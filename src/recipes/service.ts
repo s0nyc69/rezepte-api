@@ -1,3 +1,5 @@
+import RecipeNotFoundError, { InvalidRecipeError } from "../errors";
+
 export type Rezept = {
   id: number;
   titel: string;
@@ -48,13 +50,42 @@ export async function getAllRecipes(): Promise<Rezept[]> {
   return rezepte;
 }
 
-export async function getRecipeById(id: number): Promise<Rezept | null> {
-  return rezepte.find((r) => r.id === id) ?? null;
+export async function getRecipeById(id: number): Promise<Rezept> {
+  const rezept = rezepte.find((r) => r.id === id);
+  if (!rezept) {
+    throw new RecipeNotFoundError(id);
+  }
+  return rezept;
 }
 
-export async function createRecipe(daten: Omit<Rezept, "id">): Promise<Rezept> {
+export async function createRecipe(daten: unknown): Promise<Rezept> {
+  if (typeof daten !== "object" || daten === null || Array.isArray(daten)) {
+    throw new InvalidRecipeError(["titel", "zutaten", "minuten", "portionen"]);
+  }
+
+  const recipe = daten as Record<string, unknown>;
+  const invalidFields = [
+    typeof recipe.titel !== "string" || recipe.titel.trim() === "" ? "titel" : null,
+    !Array.isArray(recipe.zutaten) ||
+    recipe.zutaten.length === 0 ||
+    !recipe.zutaten.every((zutat) => typeof zutat === "string" && zutat.trim() !== "")
+      ? "zutaten"
+      : null,
+    typeof recipe.minuten !== "number" || !Number.isFinite(recipe.minuten)
+      ? "minuten"
+      : null,
+    typeof recipe.portionen !== "number" || !Number.isFinite(recipe.portionen)
+      ? "portionen"
+      : null,
+  ].filter((field): field is string => field !== null);
+
+  if (invalidFields.length > 0) {
+    throw new InvalidRecipeError(invalidFields);
+  }
+
+  const validRecipe = recipe as Omit<Rezept, "id">;
   let naechsteId = rezepte.length + 1;
-  const neues: Rezept = { id: naechsteId++, ...daten };
+  const neues: Rezept = { id: naechsteId++, ...validRecipe };
   
   rezepte.push(neues);
   return neues;

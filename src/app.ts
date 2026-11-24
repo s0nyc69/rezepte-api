@@ -1,4 +1,5 @@
 import express from "express";
+import { errorHandler, notFoundHandler } from "./error.middleware";
 import { logger } from "./logger.middleware";
 import recipeRoutes from "./recipes/routes";
 
@@ -15,5 +16,8 @@ app.get("/health", (req, res) => {
 });
 
 app.use("/recipes", recipeRoutes);    // alle Rezept-Routen hängen unter /recipes
+
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 export default app;                   // die fertige App exportieren (NICHT starten)
