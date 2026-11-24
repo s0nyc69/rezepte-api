@@ -4,7 +4,7 @@ import {
   getRecipeById,
   createRecipe,
   deleteRecipe,
-} from "./service";
+} from "./service.ts";
 
 export async function getRecipesHandler(
   req: Request,
