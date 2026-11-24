@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { HttpError } from "./errors";
+import { HttpError } from "./errors.ts";
 
 export function notFoundHandler(
   req: Request,

@@ -1,4 +1,4 @@
-import RecipeNotFoundError, { InvalidRecipeError } from "../errors";
+import RecipeNotFoundError, { InvalidRecipeError } from "../errors.ts";
 
 export type Rezept = {
   id: number;
